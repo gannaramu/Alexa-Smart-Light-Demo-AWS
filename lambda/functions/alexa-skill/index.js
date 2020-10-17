@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+/* eslint-disable no-console Ram Github*/ 
 const AWS = require("aws-sdk");
 
 const GET_DEVICES_BY_USER_FUNCTION = process.env.GET_DEVICES_BY_USER_FUNCTION;
