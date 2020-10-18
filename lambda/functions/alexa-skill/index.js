@@ -98,6 +98,10 @@ exports.handler = async function (request, context) {
                 let response = await handleColorController(request, context, endpoint);
                 return sendResponse(response.get());
             }
+            if (namespace === 'Alexa.BrightnessController') {
+                let response = await handleBrightnessController(request, context, endpoint);
+                return sendResponse(response.get());
+            }
             
             else if (namespace === 'Alexa' && name === 'ReportState') {
                 log('/////////////////////////////////////////////////////////');
@@ -501,7 +505,7 @@ async function handleReportState(request, context, endpoint) {
         name: "brightness",
         value: currentState.brightness
     });
-    
+
     return alexaResponse.get();
 }
 
@@ -839,6 +843,76 @@ async function handleColorController(request, context, endpoint) {
         );
     }    
 }
+
+
+
+async function handleBrightnessController(request, context, endpoint) {
+    /*  This function handles all requests that Alexa identifies as being a 
+        "ThermostatController" directive, such as:
+          - Turn device to cool mode
+          - Turn device to heat mode
+          - Increase device temperature
+          - Decrease device temperature
+          - Set temperature to X degrees
+    */
+    var endpointId = endpoint.endpointId;
+    var thingName = endpoint.thingName;
+    var token = request.directive.endpoint.scope.token;
+    var correlationToken = request.directive.header.correlationToken;
+    var requestMethod = request.directive.header.name; 
+    var payload = request.directive.payload;
+
+    var alexaResponse = new AlexaResponse(
+        {
+            "correlationToken": correlationToken,
+            "token": token,
+            "endpointId": endpointId
+        }
+    );
+    log('************************************************************');
+    log('************************************************************');
+    log(`Running BrightnessController handler for ${requestMethod} method`);
+    log('************************************************************');
+
+    log(requestMethod);
+    if (requestMethod === 'SetBrightness') {
+        let shadowState = {
+            state: {
+                desired: {
+                    brightness: {
+                       value: payload.brightness
+                    }
+                }
+            }
+
+        };
+
+        // For debugging purposes, we may choose to copy the desired state to reported state:
+        if (copyDesiredStateToReportedStateInShadow === true) {
+            shadowState.state.reported = shadowState.state.desired;
+        }
+        log(shadowState.state.reported)
+        await updateThingShadow(thingName, shadowState);
+
+        var targetpointContextProperty = {
+            namespace: "Alexa.BrightnessController",
+            name: "brightness",
+            value: payload.brightness
+        
+        };
+        alexaResponse.addContextProperty(targetpointContextProperty);
+        return alexaResponse.get();
+
+    }
+    else {
+        log(`ERROR: Unsupported request method ${requestMethod} for ColorController.`);
+        throw new AlexaException(
+            'INTERNAL_ERROR',
+            'Unsupported request method ${requestMethod} for ThermostatController'
+        );
+    }    
+}
+
 
 async function getDeviceShadow(thingName) {
     // Get the device's reported state per the state.reported object of the
