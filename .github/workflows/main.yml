@@ -2,7 +2,7 @@ name: "Deploy SAM Stack to Production"
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - lambda/**
 
