@@ -64,8 +64,7 @@ const discoveryConfig = {
                      proactivelyReported = true,
                         retrievable: true
                     }
-                },
-
+                }
             ]
         }
     } 
