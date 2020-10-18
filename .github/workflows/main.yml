@@ -5,23 +5,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - name: Checkout
-        uses: actions/checkout@master
+      - name: AWS SAM CLI Github Action
+        uses: TractorZoom/sam-cli-action@v.0.2.0
 
       - name: sam build
-        uses: youyo/aws-sam-action/python3.8@v2
+        uses: TractorZoom/sam-cli-action@master
         with:
-          sam_command: build
+          sam_command: "build"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-east-1
-
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
       - name: sam deploy
-        uses: youyo/aws-sam-action/python3.8@v2
+        uses: TractorZoom/sam-cli-action@master
         with:
-          sam_command: 'deploy --template-file packaged.yaml --stack-name alexa-smart-home-demo --capabilities CAPABILITY_IAM --region us-east-1 --parameter-overrides AlexaSkillId=amzn1.ask.skill.dff8f90d-897b-4a9c-9e9c-7174f18e429f AlexaVendorId=M3MHG2DW395BHN'
+          sam_command: "deploy"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-east-1
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
