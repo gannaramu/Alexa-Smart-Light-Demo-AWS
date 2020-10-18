@@ -1,15 +1,20 @@
-on: [push]
+name: "Deploy SAM Stack to Production"
+on:
+  push:
+    branches:
+      - master
 
 jobs:
-  aws_sam:
+  deploy:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: see directory
         run: ls -R
       - name: sam build
         uses: TractorZoom/sam-cli-action@master
         with:
-          sam_command: "build -t template.yaml"
+          sam_command: "build -t template.yml"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -17,7 +22,6 @@ jobs:
       - name: sam deploy
         uses: TractorZoom/sam-cli-action@master
         with:
-          working_directory: ./lambda
           sam_command: "deploy"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
