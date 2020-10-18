@@ -53,12 +53,26 @@ const discoveryConfig = {
                 },
               {
                     type: "AlexaInterface",
-                    interface: "Alexa.ColorController",
+                    interface: "Alexa.BrightnessController",
                     version: "3",
                     properties: {
                         supported: [
                             {
                                 "name": "color"
+                            }
+                        ],
+                     proactivelyReported: true,
+                        retrievable: true
+                    }
+                },
+                {
+                    type: "AlexaInterface",
+                    interface: "Alexa.ColorController",
+                    version: "3",
+                    properties: {
+                        supported: [
+                            {
+                                "name": "brightness"
                             }
                         ],
                      proactivelyReported: true,
