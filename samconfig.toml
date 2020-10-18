@@ -7,5 +7,4 @@ s3_bucket = "smart-light-bucket-2"
 region = "us-east-1"
 confirm_changeset = false
 capabilities = "CAPABILITY_IAM"
-template_file="packaged.yaml"
 parameter_overrides=["AlexaSkillId=amzn1.ask.skill.dff8f90d-897b-4a9c-9e9c-7174f18e429f","AlexaVendorId=M11XS481S9P0B2"]
