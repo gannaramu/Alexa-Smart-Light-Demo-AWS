@@ -1,0 +1,9 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "alexa-smart-home-demo"
+s3_bucket = "smart-light-bucket-2"
+region = "us-east-1"
+confirm_changeset = false
+capabilities = "CAPABILITY_IAM"
