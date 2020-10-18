@@ -4,6 +4,8 @@ jobs:
   aws_sam:
     runs-on: ubuntu-latest
     steps:
+      - name: see directory
+        run: ls -R
       - name: sam build
         uses: TractorZoom/sam-cli-action@master
         with:
