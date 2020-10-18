@@ -20,7 +20,7 @@ jobs:
       - name: sam deploy
         uses: youyo/aws-sam-action/python3.8@v2
         with:
-          sam_command: 'deploy --no-fail-on-empty-changeset --no-confirm-changeset'
+          sam_command: 'deploy --template-file packaged.yaml --stack-name alexa-smart-home-demo --capabilities CAPABILITY_IAM --region us-east-1 --parameter-overrides AlexaSkillId=amzn1.ask.skill.dff8f90d-897b-4a9c-9e9c-7174f18e429f AlexaVendorId=M3MHG2DW395BHN'
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
