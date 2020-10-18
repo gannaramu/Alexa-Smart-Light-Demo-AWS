@@ -15,5 +15,5 @@ jobs:
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_region: ${{ secrets.AWS_REGION }}
           function_name: alexa-smart-home-demo-AlexaSkillFunction-1P33HF6IGWUNP
-          source: lambda/functions/alexa-skill/
+          source: lambda/functions/alexa-skill
  
