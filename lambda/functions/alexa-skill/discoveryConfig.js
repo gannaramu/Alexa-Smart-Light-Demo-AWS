@@ -47,7 +47,7 @@ const discoveryConfig = {
                                 "name": "powerState"
                             }
                         ],
-                     proactivelyReported = true,
+                     proactivelyReported: true,
                         retrievable: true
                     }
                 },
@@ -61,7 +61,7 @@ const discoveryConfig = {
                                 "name": "color"
                             }
                         ],
-                     proactivelyReported = true,
+                     proactivelyReported: true,
                         retrievable: true
                     }
                 }
