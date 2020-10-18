@@ -501,7 +501,6 @@ async function handleReportState(request, context, endpoint) {
         name: "brightness",
         value: currentState.brightness
     });
-    
     return alexaResponse.get();
 }
 
