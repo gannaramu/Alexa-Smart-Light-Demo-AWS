@@ -15,21 +15,17 @@ const discoveryConfig = {
             modelName: 'Model 001',
             friendlyName: 'Smart Device',
             description: 'My SmartHome Product!',
-            displayCategories: [
-                'OTHER', 
-                'THERMOSTAT',
-                'TEMPERATURE_SENSOR'
-            ],
-            validRange: {
-                minimumValue: {
-                    value: 60.0,
-                    scale: "FAHRENHEIT"
-                },
-                maximumValue: {
-                    value: 90.0,
-                    scale: "FAHRENHEIT"
-                }
-            },
+            displayCategories: ['LIGHT'],
+//             validRange: {
+//                 minimumValue: {
+//                     value: 60.0,
+//                     scale: "FAHRENHEIT"
+//                 },
+//                 maximumValue: {
+//                     value: 90.0,
+//                     scale: "FAHRENHEIT"
+//                 }
+//             },
             capabilities: [
                 {
                     // Basic capability that should be included for all
@@ -53,44 +49,59 @@ const discoveryConfig = {
                 },
                 {
                     type: "AlexaInterface",
-                    interface: "Alexa.TemperatureSensor",
+                    interface: "Alexa.PowerController",
                     version: "3",
                     properties: {
                         supported: [
                             {
-                                "name": "temperature"
+                                "name": "powerState"
                             }
                         ],
+                     proactivelyReported = true,
                         retrievable: true
                     }
                 },
-                {
-                    type: 'AlexaInterface',
-                    interface: 'Alexa.ThermostatController',
-                    version: '3',
+              {
+                    type: "AlexaInterface",
+                    interface: "Alexa.ColorController",
+                    version: "3",
                     properties: {
                         supported: [
                             {
-                                name: 'targetSetpoint'
-                            },
-                            {
-                                name: 'thermostatMode'
-                            },
-                            {
-                                name: 'targetSetpointDelta'
+                                "name": "color"
                             }
                         ],
+                     proactivelyReported = true,
                         retrievable: true
-                    },
-                    configuration: {
-                        supportsScheduling: false, 
-                        supportedModes: [
-                            'HEAT',
-                            'COOL',
-                            'OFF'
-                        ]
                     }
-                }
+                },
+//                 {
+//                     type: 'AlexaInterface',
+//                     interface: 'Alexa.ThermostatController',
+//                     version: '3',
+//                     properties: {
+//                         supported: [
+//                             {
+//                                 name: 'targetSetpoint'
+//                             },
+//                             {
+//                                 name: 'thermostatMode'
+//                             },
+//                             {
+//                                 name: 'targetSetpointDelta'
+//                             }
+//                         ],
+//                         retrievable: true
+//                     },
+//                     configuration: {
+//                         supportsScheduling: false, 
+//                         supportedModes: [
+//                             'HEAT',
+//                             'COOL',
+//                             'OFF'
+//                         ]
+//                     }
+//                 }
             ]
         }
     } 
