@@ -4,10 +4,6 @@ jobs:
   aws_sam:
     runs-on: ubuntu-latest
     steps:
-
-      - name: AWS SAM CLI Github Action
-        uses: TractorZoom/sam-cli-action@v.0.2.0
-
       - name: sam build
         uses: TractorZoom/sam-cli-action@master
         with:
