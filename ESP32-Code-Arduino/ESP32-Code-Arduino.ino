@@ -128,7 +128,7 @@ void Startup (char *topicName, int payloadLen, char *payLoad)
   strncpy(rcvdPayload, payLoad, payloadLen);
   rcvdPayload[payloadLen] = 0;
   msgReceived = 1;
-   Serial.println("******* Startup Function Called");
+//   Serial.println("******* Startup Function Called");
 }
 void updateShadowPower (int power)
 {
@@ -177,7 +177,7 @@ void updateShadowColor (float h, float s, float b)
 
 void updateBrightness (float b)
 {
-  sprintf(reportpayload, "{\"state\": {\"reported\": { \"brightness\": \"%f\", \"color\": {\"hue\": \"%f\",\"saturation\":  \"%f\",\"brightness\":  \"%f\"}}}}", b, b);
+  sprintf(reportpayload, "{\"state\": {\"reported\": { \"brightness\": {\"value\":\"%d\"}, \"color\": {\"brightness\":  \"%f\"}}}}", (int)b, (b/100));
   delay(500);
   if (shadow.publish(SHADOW_UPDATE, reportpayload) == 0)
   {
@@ -498,11 +498,21 @@ void loop() {
       }
     }
     else if(doc["state"]["desired"]["brightness"]) {
-      float b = doc["state"]["desired"]["brightness"];
-
+      
+      int b = doc["state"]["desired"]["brightness"]["value"];
+      Serial.println("******* Brightness Function Called");
       for(int light;light<3;light++){
-        int bb = (int)(b*100);
+        int bb =b;
          bri[light]=map(bb,0,100,0,255);
+         Serial.print("HSV light:"); Serial.println(light);
+        Serial.print(hue[light]); Serial.print("  ");
+        Serial.print(sat[light]); Serial.print("  ");
+        Serial.println(bri[light]);
+         process_lightdata(light, transitiontime);
+          Serial.print("RGB light:"); Serial.println(light);
+        Serial.print(rgb[light][0]); Serial.print("  ");
+        Serial.print(rgb[light][1]); Serial.print("  ");
+        Serial.println(rgb[light][2]);
       }
       updateBrightness(b);
     }
