@@ -499,7 +499,7 @@ async function handleReportState(request, context, endpoint) {
      alexaResponse.addContextProperty({
         namespace: "Alexa.BrightnessController",
         name: "brightness",
-        value: currentState.color.brightness
+        value: currentState.brightness
     });
     return alexaResponse.get();
 }
