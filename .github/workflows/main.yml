@@ -7,7 +7,7 @@ jobs:
       - name: sam build
         uses: TractorZoom/sam-cli-action@master
         with:
-          directory: lambda
+          directory: ./lambda
           sam_command: "build"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -16,7 +16,7 @@ jobs:
       - name: sam deploy
         uses: TractorZoom/sam-cli-action@master
         with:
-          working_directory: lambda
+          working_directory: ./lambda
           sam_command: "deploy"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
