@@ -16,16 +16,6 @@ const discoveryConfig = {
             friendlyName: 'Smart Device',
             description: 'My SmartHome Product!',
             displayCategories: ['LIGHT'],
-//             validRange: {
-//                 minimumValue: {
-//                     value: 60.0,
-//                     scale: "FAHRENHEIT"
-//                 },
-//                 maximumValue: {
-//                     value: 90.0,
-//                     scale: "FAHRENHEIT"
-//                 }
-//             },
             capabilities: [
                 {
                     // Basic capability that should be included for all
@@ -75,33 +65,7 @@ const discoveryConfig = {
                         retrievable: true
                     }
                 },
-//                 {
-//                     type: 'AlexaInterface',
-//                     interface: 'Alexa.ThermostatController',
-//                     version: '3',
-//                     properties: {
-//                         supported: [
-//                             {
-//                                 name: 'targetSetpoint'
-//                             },
-//                             {
-//                                 name: 'thermostatMode'
-//                             },
-//                             {
-//                                 name: 'targetSetpointDelta'
-//                             }
-//                         ],
-//                         retrievable: true
-//                     },
-//                     configuration: {
-//                         supportsScheduling: false, 
-//                         supportedModes: [
-//                             'HEAT',
-//                             'COOL',
-//                             'OFF'
-//                         ]
-//                     }
-//                 }
+
             ]
         }
     } 
