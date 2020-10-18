@@ -7,7 +7,7 @@ jobs:
       - name: sam build
         uses: TractorZoom/sam-cli-action@master
         with:
-          working_directory: Alexa-Smart-Light-Demo-AWS
+          directory: Alexa-Smart-Light-Demo-AWS
           sam_command: "build"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
