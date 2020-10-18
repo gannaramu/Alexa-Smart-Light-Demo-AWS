@@ -897,7 +897,10 @@ async function handleBrightnessController(request, context, endpoint) {
         var targetpointContextProperty = {
             namespace: "Alexa.BrightnessController",
             name: "brightness",
-            value: payload.brightness
+            value:
+            {
+                value: payload.brightness
+            } 
         
         };
         alexaResponse.addContextProperty(targetpointContextProperty);
