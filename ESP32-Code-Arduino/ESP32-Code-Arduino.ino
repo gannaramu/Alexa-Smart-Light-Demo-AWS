@@ -9,11 +9,15 @@
 #include <ArduinoJson.h> //Download latest ArduinoJson 6 Version library only by Benoît Blanchon from Manage Libraries
 #include <NeoPixelBus.h>
 #include <ColorConverterLib.h>
+#include <Blynk.h>
+#include <BlynkSimpleEsp32.h>
+
 //#include "NeoFade.h"
 //NeoFade F;
 
 AWS_IOT shadow;
 #define ledPin 2 // LED Pin
+BlynkTimer timer;
 
 #define light_name "WS2812 Hue Strip" //default light name
 #define lightsCount 3
@@ -38,7 +42,7 @@ char SHADOW_UPDATE[] = "$aws/things/alexa-smart-home-demo-SmartHomeThing-RV9S38N
 char GET_DELTA[] = "$aws/things/alexa-smart-home-demo-SmartHomeThing-RV9S38NS5U6U/shadow/update/delta";
 char UPDATE_ACCEPTED[] = "$aws/things/alexa-smart-home-demo-SmartHomeThing-RV9S38NS5U6U/shadow/update/accepted";
 
-
+bool start = true;
 
 int status = WL_IDLE_STATUS;
 int msgReceived = 0;
@@ -77,12 +81,12 @@ void infoLight(RgbColor color) {
 
 void process_lightdata(uint8_t light, float transitiontime) {
   transitiontime *= 17 - (pixelCount / 40); //every extra led add a small delay that need to be counted
-//  if (color_mode[light] == 1 && light_state[light] == true) {
-//    convert_xy(light);
-//  } else if (color_mode[light] == 2 && light_state[light] == true) {
-//    convert_ct(light);
-//  } 
-if (color_mode[light] == 3 && light_state[light] == true) {
+  //  if (color_mode[light] == 1 && light_state[light] == true) {
+  //    convert_xy(light);
+  //  } else if (color_mode[light] == 2 && light_state[light] == true) {
+  //    convert_ct(light);
+  //  }
+  if (color_mode[light] == 3 && light_state[light] == true) {
     convert_hue(light);
   }
   for (uint8_t i = 0; i < 3; i++) {
@@ -113,9 +117,6 @@ RgbColor convFloat(float color[3]) {
 }
 
 
-
-
-
 void mySubCallBackHandler (char *topicName, int payloadLen, char *payLoad)
 {
   strncpy(rcvdPayload, payLoad, payloadLen);
@@ -127,8 +128,58 @@ void Startup (char *topicName, int payloadLen, char *payLoad)
 {
   strncpy(rcvdPayload, payLoad, payloadLen);
   rcvdPayload[payloadLen] = 0;
-  msgReceived = 1;
-//   Serial.println("******* Startup Function Called");
+  if ( start) {
+    Serial.println("**********Startup Function Called********************");
+    StaticJsonDocument<256> doc;
+    deserializeJson(doc, rcvdPayload);
+    float h = doc["state"]["desired"]["color"]["hue"];
+    float s = doc["state"]["desired"]["color"]["saturation"];
+    float b = doc["state"]["desired"]["color"]["brightness"];
+    for (int light; light < 3; light++)
+    {
+      color_mode[light] = 3;
+      hue[light] = h;
+      int ss = (int)(s * 100);
+      int bb = (int)(b * 100);
+      bri[light] = map(bb, 0, 100, 0, 255);
+      sat[light] = map(ss, 0, 100, 0, 255);
+      process_lightdata(light, transitiontime);
+    }
+
+    updateShadowColor(h, s, b);
+    String power = doc["state"]["desired"]["powerState"];
+    Serial.println(power);
+    if (power.equals("ON")) {
+      for (int light = 0; light < lightsCount; light++) {
+        light_state[light] = true;
+      }
+      updateShadowPower(1);
+    }
+    else {
+      for (int light = 0; light < lightsCount; light++) {
+        light_state[light] = false;
+      }
+      updateShadowPower(1);
+    }
+    Serial.print("hue is set to:        "); Serial.println(h);
+    Serial.print("saturation is set to: "); Serial.println(s);
+    Serial.print("brightness is set to: "); Serial.println(b);
+    for (int light; light < 3; light++)
+    {
+      color_mode[light] = 3;
+      hue[light] = h;
+      int ss = (int)(s * 100);
+      int bb = (int)(b * 100);
+      bri[light] = map(bb, 0, 100, 0, 255);
+      sat[light] = map(ss, 0, 100, 0, 255);
+
+      process_lightdata(light, transitiontime);
+
+    }
+    start = false;
+    connectToAWS();
+    Serial.println("**********Startup Function Ended ********************");
+  }
 }
 void updateShadowPower (int power)
 {
@@ -136,15 +187,22 @@ void updateShadowPower (int power)
     sprintf(reportpayload, "{\"state\": {\"reported\": {\"powerState\":\"ON\"}}}");
     for (int light = 0; light < lightsCount; light++) {
       light_state[light] = true;
+      hue[light] = 255;
+      bri[light] = 255;
+      sat[light] = 255;
+      process_lightdata(light, transitiontime);
     }
   } else {
     sprintf(reportpayload, "{\"state\": {\"reported\": {\"powerState\":\"OFF\"}}}");
     for (int light = 0; light < lightsCount; light++) {
       light_state[light] = false;
+      hue[light] = 0;
+      bri[light] = 0;
+      sat[light] = 0;
+      process_lightdata(light, transitiontime);
     }
-
   }
-  delay(500);
+  delay(1000);
   if (shadow.publish(SHADOW_UPDATE, reportpayload) == 0)
   {
     Serial.print("Publish Message:");
@@ -161,7 +219,7 @@ void updateShadowPower (int power)
 
 void updateShadowColor (float h, float s, float b)
 {
-  sprintf(reportpayload, "{\"state\": {\"reported\": {\"color\": {\"hue\": \"%f\",\"saturation\":  \"%f\",\"brightness\":  \"%f\"}}}}", h, s, b);
+  sprintf(reportpayload, "{\"state\": {\"reported\": {\"color\": {\"hue\": %f,\"saturation\":  %f,\"brightness\":  %f}}}}", h, s, b);
   delay(500);
   if (shadow.publish(SHADOW_UPDATE, reportpayload) == 0)
   {
@@ -175,9 +233,9 @@ void updateShadowColor (float h, float s, float b)
   }
 }
 
-void updateBrightness (float b)
+void updateBrightness (int b)
 {
-  sprintf(reportpayload, "{\"state\": {\"reported\": { \"brightness\": {\"value\":\"%d\"}, \"color\": {\"brightness\":  \"%f\"}}}}", (int)b, (b/100));
+  sprintf(reportpayload, "{\"state\": {\"reported\": { \"brightness\": {\"value\":%d}}}}", b, (b / 100));
   delay(500);
   if (shadow.publish(SHADOW_UPDATE, reportpayload) == 0)
   {
@@ -198,29 +256,8 @@ void convert_hue(uint8_t light)
   double      hh, p, q, t, ff, s, v;
   int        i;
 
-  s = sat[light]/ 255.0;
-  v = bri[light]/ 255.0;
-
-//  if (s <= 0.0) {      // < is bogus, just shuts up warnings
-//    rgb[light][0] = v;
-//    rgb[light][1] = v;
-//    rgb[light][2] = v;
-//    return;
-//  }
-
-//
-//        if (s == 0) {
-//          // Achromatic (grey)
-//          r = g = b = round(v * 255);
-//        }
-//        h /= 60; // sector 0 to 5
-//        i = floor(h);
-//        f = h - i; // factorial part of h
-//        p = v * (1 - s);
-//        q = v * (1 - s * f);
-//        t = v * (1 - s * (1 - f));
-
-
+  s = sat[light] / 255.0;
+  v = bri[light] / 255.0;
   hh = hue[light];
   if (hh > 360.0) hh = 0;
   hh /= 60;
@@ -264,10 +301,10 @@ void convert_hue(uint8_t light)
       rgb[light][2] = round(q * 255.0);
       break;
   }
-if (s == 0 && hh==0) {
-          // Achromatic (grey)
-          rgb[light][0] = rgb[light][1] = rgb[light][2] = round(v * 255);
-        }
+  if (s == 0 && hh == 0) {
+    // Achromatic (grey)
+    rgb[light][0] = rgb[light][1] = rgb[light][2] = round(v * 255);
+  }
 }
 void lightEngine() {
   for (int i = 0; i < lightsCount; i++) {
@@ -361,16 +398,60 @@ float step(float e, float x) {
   return x < e ? 0.0 : 1.0;
 }
 
+void connectWifi() {
+  while (status != WL_CONNECTED)
+  {
+    Serial.print("Attempting to connect to SSID: ");
+    //    infoLight(white);
+    Serial.println(WIFI_SSID);
+    status = WiFi.begin(WIFI_SSID, WIFI_PASSWORD); // Connect to WPA/WPA2 network. Change this line if using open or WEP network:
+    delay(1000);// wait 5 seconds for connection:
+  }
 
+}
+
+void sendEmpty()
+{
+  if (shadow.publish(SENT_GET, "{}") == 0)
+  {
+    Serial.print("Empty String Published\n");
+  }
+  else
+  {
+    Serial.println("Empty String Publish failed\n");
+
+  }  /*Sent Empty string to fetch Shadow desired state*/
+}
+void connectToAWS()
+{
+
+  if (shadow.connect(HOST_ADDRESS, CLIENT_ID) == 0) //Connect to AWS IoT COre
+  {
+    Serial.println("Connected to AWS");
+    delay(1000);
+
+    if (0 == shadow.subscribe(UPDATE_ACCEPTED, mySubCallBackHandler)) //Subscribe to Accepted GET Shadow Service
+    {
+      Serial.println("Subscribe to UPDATE_ACCEPTED Successfull");
+    }
+    else
+    {
+      Serial.println("Subscribe Failed for GET_DELTA, Check the Thing Name and Certificates");
+      while (1);
+    }
+  }
+  else
+  {
+    Serial.println("AWS connection failed, Check the HOST Address");
+    while (1);
+  }
+
+}
 void setup() {
   strip.Begin();
   strip.Show();
   Serial.begin(115200);
   pinMode(ledPin, OUTPUT);
-//  F.begin();
-//  F.setPeriod(5000);
-
-
 
   while (status != WL_CONNECTED)
   {
@@ -387,35 +468,21 @@ void setup() {
   {
     Serial.println("Connected to AWS");
     delay(1000);
-
-    if (0 == shadow.subscribe(UPDATE_ACCEPTED, mySubCallBackHandler)) //Subscribe to Accepted GET Shadow Service
-    {
-      Serial.println("Subscribe to GET_DELTA Successfull");
-    }
-    else
-    {
-      Serial.println("Subscribe Failed for GET_DELTA, Check the Thing Name and Certificates");
-      while (1);
-    }
-
     if (0 == shadow.subscribe(SHADOW_GET, Startup)) //Subscribe to Accepted GET Shadow Service
     {
-      Serial.println("Subscribe to GET_DELTA Successfull");
+      Serial.println("Subscribe to SHADOW_GET Successfull");
     }
     else
     {
       Serial.println("Subscribe Failed for GET_DELTA, Check the Thing Name and Certificates");
       while (1);
     }
-
-
   }
   else
   {
     Serial.println("AWS connection failed, Check the HOST Address");
     while (1);
   }
-
 
   delay(3000); /*Sent Empty string to fetch Shadow desired state*/
   if (shadow.publish(SENT_GET, "{}") == 0)
@@ -428,7 +495,9 @@ void setup() {
   }  /*Sent Empty string to fetch Shadow desired state*/
   uint8_t light;
   float transitiontime = 4;
-//  process_lightdata(light, transitiontime);
+  //  process_lightdata(light, transitiontime);
+  timer.setInterval(10000L, connectWifi);
+  timer.setInterval(50000L, sendEmpty);
 
 }
 int temp = 0;
@@ -452,41 +521,41 @@ void loop() {
       Serial.print("hue is set to:        "); Serial.println(h);
       Serial.print("saturation is set to: "); Serial.println(s);
       Serial.print("brightness is set to: "); Serial.println(b);
-      
-      for (int light;light<3;light++)
+
+      for (int light; light < 3; light++)
       {
         color_mode[light] = 3;
-        hue[light]=h;
-        int ss = (int)(s*100);
-        int bb = (int)(b*100);
-        Serial.print("ss:  ");
-        Serial.println(ss);
-        Serial.print("bb:  ");
-        Serial.println(bb);
-        Serial.print("bri:  ");
-        Serial.println(map(bb,0,100,0,255));
-        Serial.print("sat:  ");
-        Serial.println(map(ss,0,100,0,255));
-         bri[light]=map(bb,0,100,0,255);
-         sat[light]=map(ss,0,100,0,255);
-        Serial.print("HSV light:"); Serial.println(light);
-        Serial.print(hue[light]); Serial.print("  ");
-        Serial.print(sat[light]); Serial.print("  ");
-        Serial.println(bri[light]);
-//         convert_hue(light);
-          process_lightdata(light, transitiontime);
+        hue[light] = h;
+        int ss = (int)(s * 100);
+        int bb = (int)(b * 100);
+        //        Serial.print("ss:  ");
+        //        Serial.println(ss);
+        //        Serial.print("bb:  ");
+        //        Serial.println(bb);
+        //        Serial.print("bri:  ");
+        //        Serial.println(map(bb,0,100,0,255));
+        //        Serial.print("sat:  ");
+        //        Serial.println(map(ss,0,100,0,255));
+        bri[light] = map(bb, 0, 100, 0, 255);
+        sat[light] = map(ss, 0, 100, 0, 255);
+        //        Serial.print("HSV light:"); Serial.println(light);
+        //        Serial.print(hue[light]); Serial.print("  ");
+        //        Serial.print(sat[light]); Serial.print("  ");
+        //        Serial.println(bri[light]);
+        //         convert_hue(light);
+        process_lightdata(light, transitiontime);
 
-        Serial.print("RGB light:"); Serial.println(light);
-        Serial.print(rgb[light][0]); Serial.print("  ");
-        Serial.print(rgb[light][1]); Serial.print("  ");
-        Serial.println(rgb[light][2]);
+        //        Serial.print("RGB light:"); Serial.println(light);
+        //        Serial.print(rgb[light][0]); Serial.print("  ");
+        //        Serial.print(rgb[light][1]); Serial.print("  ");
+        //        Serial.println(rgb[light][2]);
       }
-         
 
-        updateShadowColor(h, s, b);
-    
 
-    }    
+      updateShadowColor(h, s, b);
+
+
+    }
     else if (doc["state"]["desired"]["powerState"]) {
       String power = doc["state"]["desired"]["powerState"];
       Serial.print(power);
@@ -497,26 +566,21 @@ void loop() {
         updateShadowPower(0);
       }
     }
-    else if(doc["state"]["desired"]["brightness"]) {
-      
+    else if (doc["state"]["desired"]["brightness"]) {
+
       int b = doc["state"]["desired"]["brightness"]["value"];
       Serial.println("******* Brightness Function Called");
-      for(int light;light<3;light++){
-        int bb =b;
-         bri[light]=map(bb,0,100,0,255);
-         Serial.print("HSV light:"); Serial.println(light);
-        Serial.print(hue[light]); Serial.print("  ");
-        Serial.print(sat[light]); Serial.print("  ");
-        Serial.println(bri[light]);
-         process_lightdata(light, transitiontime);
-          Serial.print("RGB light:"); Serial.println(light);
-        Serial.print(rgb[light][0]); Serial.print("  ");
-        Serial.print(rgb[light][1]); Serial.print("  ");
-        Serial.println(rgb[light][2]);
+      for (int light=0; light < 3; light++) {
+        int bb = b;
+        bri[light] = map(bb, 0, 100, 0, 255);
+        process_lightdata(light, transitiontime);
+ 
       }
       updateBrightness(b);
     }
   }
-  
+
   lightEngine();
+  timer.run();
+
 }
