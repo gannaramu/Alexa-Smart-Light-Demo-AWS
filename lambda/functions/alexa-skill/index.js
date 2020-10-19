@@ -503,7 +503,7 @@ async function handleReportState(request, context, endpoint) {
      alexaResponse.addContextProperty({
         namespace: "Alexa.BrightnessController",
         name: "brightness",
-        value: currentState.brightness
+        value: currentState.brightness.value
     });
 
     return alexaResponse.get();
@@ -695,7 +695,6 @@ async function handlePowerController(request, context, endpoint) {
         }
     );
     log('************************************************************');
-    log('************************************************************');
     log(`Running PowerController handler for ${requestMethod} method`);
     log('************************************************************');
 
@@ -732,7 +731,6 @@ async function handlePowerController(request, context, endpoint) {
     }
     else if (requestMethod == 'TurnOff'){
 
-    log('************************************************************');
     log('************************************************************');
     log(`Running PowerController handler for ${requestMethod} method`);
     log('************************************************************');
@@ -795,7 +793,6 @@ async function handleColorController(request, context, endpoint) {
             "endpointId": endpointId
         }
     );
-    log('************************************************************');
     log('************************************************************');
     log(`Running ColorController handler for ${requestMethod} method`);
     log('************************************************************');
