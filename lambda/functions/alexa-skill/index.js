@@ -870,7 +870,6 @@ async function handleBrightnessController(request, context, endpoint) {
         }
     );
     log('************************************************************');
-    log('************************************************************');
     log(`Running BrightnessController handler for ${requestMethod} method`);
     log('************************************************************');
 
