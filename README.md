@@ -1,5 +1,10 @@
-# aws-alexa-smart-home-demo
+# aws-alexa-smart-home-demo 
 ![Deploy SAM Stack to Production](https://github.com/gannaramu/Alexa-Smart-Light-Demo-AWS/workflows/Deploy%20SAM%20Stack%20to%20Production/badge.svg)
+
+Forked from [https://github.com/matwerber1/aws-alexa-smart-home-demo](https://github.com/matwerber1/aws-alexa-smart-home-demo)
+
+**The readme needs to be updated. This readme is for a smart thermostat. but the files have the code for Smart Light.**
+
 ## Overview
 This project shows you how to build an Amazon Alexa skill to control a (mock) thermostat using the [Alexa Smart Home API](https://developer.amazon.com/docs/smarthome/understand-the-smart-home-skill-api.html) and an ESP32 development board (optional).
 
@@ -19,6 +24,10 @@ They say a picture is worth a thousand words:
 
 This video shows the ESP32 in action by asking Alexa to change the device's state and asking it for the current temperature: 
 https://www.youtube.com/watch?v=Cc9Y0D2bzJ8
+
+![Brightness](./images/Brightness.gif)
+![Color_change](./images/Color_change.gif)
+![Power_On_Off](./images/Power_On_Off.gif)
 
 ## Disclaimer
 
